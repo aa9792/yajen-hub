@@ -14,6 +14,13 @@ type Site = {
 };
 
 const STORAGE_KEY = "site-hub-items-v1";
+const SOFT_COLOR_MAP: Record<string, string> = {
+  "#396253": "#BFE6D3",
+  "#bf6948": "#F6B8D4",
+  "#446789": "#A9E5F1",
+  "#a17a38": "#F7D6A3",
+  "#725780": "#C9C0FF",
+};
 
 const starterSites: Site[] = [
   { id: "reeds", title: "REEDS 學習中心", url: "https://aa9792.github.io/reeds/", category: "教學資源", description: "課程規劃、教學內容與校務資訊的整合平台。", color: "#396253", favorite: true },
@@ -26,7 +33,11 @@ function loadSites(): Site[] {
   if (typeof window === "undefined") return starterSites;
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : starterSites;
+    if (!saved) return starterSites;
+    const parsed: Site[] = JSON.parse(saved);
+    const softened = parsed.map((site) => ({ ...site, color: SOFT_COLOR_MAP[site.color] || site.color }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(softened));
+    return softened;
   } catch {
     return starterSites;
   }
@@ -166,7 +177,7 @@ export function SiteHub() {
 }
 
 export function AddSite() {
-  const colors = ["#396253", "#bf6948", "#446789", "#a17a38", "#725780"];
+  const colors = ["#C9C0FF", "#F6B8D4", "#A9E5F1", "#BFE6D3", "#F7D6A3", "#C8D9FF"];
   const [color, setColor] = useState(colors[0]);
   const [image, setImage] = useState("");
   const [title, setTitle] = useState("");
@@ -191,7 +202,7 @@ export function AddSite() {
           <div className="form-section"><span>01</span><h2>基本資訊</h2></div>
           <label>網站名稱<input required value={title} onChange={(e) => setTitle(e.target.value)} name="title" placeholder="例如：課程管理系統" /></label>
           <label>網站網址<input required name="url" type="text" inputMode="url" placeholder="https://example.com" /></label>
-          <div className="two-col"><label>分類<input required value={category} onChange={(e) => setCategory(e.target.value)} name="category" list="category-list" placeholder="選擇或輸入分類" /><datalist id="category-list"><option>教學資源</option><option>工作工具</option><option>專案計畫</option><option>個人收藏</option></datalist></label><label>卡片色彩<span className="color-row">{colors.map((item) => <button type="button" aria-label={`選擇色彩 ${item}`} className={color === item ? "selected" : ""} style={{ background: item }} onClick={() => setColor(item)} key={item} />)}</span></label></div>
+          <div className="two-col"><label>分類<select required value={category} onChange={(e) => setCategory(e.target.value)} name="category"><option value="工作工具">工作工具</option><option value="教學資源">教學資源</option><option value="專案計畫">專案計畫</option><option value="常用服務">常用服務</option><option value="個人收藏">個人收藏</option><option value="靈感探索">靈感探索</option><option value="其他">其他</option></select></label><label>卡片色彩<span className="color-row">{colors.map((item) => <button type="button" aria-label={`選擇色彩 ${item}`} className={color === item ? "selected" : ""} style={{ background: item }} onClick={() => setColor(item)} key={item} />)}</span></label></div>
           <label>簡短說明<textarea required name="description" rows={3} placeholder="這個網站主要用來做什麼？" /></label>
           <div className="form-section second"><span>02</span><h2>網站縮圖</h2></div>
           <label>自訂縮圖網址 <small>選填；留白會自動取得原網站縮圖</small><input value={image} onChange={(e) => setImage(e.target.value)} name="image" type="url" placeholder="https://example.com/preview.jpg" /></label>

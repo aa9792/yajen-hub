@@ -11,3 +11,13 @@
 @media(max-width:900px){.site-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.add-layout{grid-template-columns:1fr}.form-intro{position:static;height:auto;padding-block:55px}.form-intro>a{margin-bottom:45px}.hero-stat{display:none}.controls{align-items:stretch;flex-direction:column}}
 @media(max-width:620px){.topbar{height:68px;top:10px;margin-top:10px;padding-inline:17px;border-radius:18px}.topbar nav>a:first-child{display:none}.topbar nav{gap:8px}.add-link{padding:10px 12px}.hero{padding:75px 24px 48px}.hero h1{font-size:52px}.hero-copy{font-size:14px}.controls{width:calc(100% - 32px);margin-bottom:38px}.categories{margin-right:-12px}.site-grid{grid-template-columns:1fr}.gallery{padding:0 20px 80px}.add-layout{min-height:auto;padding:40px 16px}.form-intro h1{font-size:49px}.site-form{padding:45px 22px}.two-col{grid-template-columns:1fr}.form-actions{justify-content:space-between}footer{width:calc(100% - 32px);flex-direction:column;gap:9px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* Softer card palette and a native, complete category menu. */
+.site-form select{border:1px solid rgba(255,255,255,.8);background:rgba(255,255,255,.58);border-radius:13px;padding:14px 15px;outline:0;color:var(--ink);box-shadow:inset 0 1px 3px rgba(70,57,133,.05);cursor:pointer}
+.site-form select:focus{border-color:rgba(109,93,252,.55);background:rgba(255,255,255,.78);box-shadow:0 0 0 3px rgba(109,93,252,.1)}
+.color-row button{width:30px;height:30px;border-color:rgba(255,255,255,.88);outline-width:2px;box-shadow:0 6px 14px rgba(77,67,133,.1);transition:transform .2s,outline-color .2s}
+.color-row button:hover{transform:translateY(-2px) scale(1.06)}
+.preview-badge{color:color-mix(in srgb,var(--site-color) 42%,#293052);border-color:color-mix(in srgb,var(--site-color) 72%,white);background:rgba(255,255,255,.55)}
+.preview-content strong{color:color-mix(in srgb,var(--site-color) 34%,#20294e)}
+.preview-line{background:color-mix(in srgb,var(--site-color) 48%,white)}
+.preview-button{background:color-mix(in srgb,var(--site-color) 42%,#5c4bd8)}
