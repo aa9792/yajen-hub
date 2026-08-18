@@ -51,8 +51,46 @@ function Header() {
   );
 }
 
-function Preview({ site }: { site: Site }) {
-  if (site.image) return <img src={site.image} alt={`${site.title} 網站縮圖`} />;
+function screenshotUrl(url: string, refreshKey = 0) {
+  return `https://image.thum.io/get/width/1200/crop/675/noanimate/?url=${encodeURIComponent(url)}&refresh=${refreshKey}`;
+}
+
+function Preview({ site, refreshKey = 0 }: { site: Site; refreshKey?: number }) {
+  const [source, setSource] = useState<string | null>(site.image || null);
+  const [triedScreenshot, setTriedScreenshot] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setTriedScreenshot(false);
+    if (site.image) {
+      setSource(site.image);
+      return () => { active = false; };
+    }
+    if (!/^https?:\/\//i.test(site.url)) {
+      setSource(null);
+      return () => { active = false; };
+    }
+    setSource(null);
+    fetch(`https://api.microlink.io/?url=${encodeURIComponent(site.url)}`)
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((result) => {
+        if (!active) return;
+        const ogImage = result?.data?.image?.url;
+        if (ogImage) setSource(ogImage);
+        else { setTriedScreenshot(true); setSource(screenshotUrl(site.url, refreshKey)); }
+      })
+      .catch(() => {
+        if (active) { setTriedScreenshot(true); setSource(screenshotUrl(site.url, refreshKey)); }
+      });
+    return () => { active = false; };
+  }, [site.image, site.url, refreshKey]);
+
+  if (source) return <img src={source} alt={`${site.title} 原網站縮圖`} onError={() => {
+    if (!triedScreenshot && /^https?:\/\//i.test(site.url)) {
+      setTriedScreenshot(true);
+      setSource(screenshotUrl(site.url, refreshKey));
+    } else setSource(null);
+  }} />;
   return (
     <div className="generated-preview" style={{ "--site-color": site.color } as React.CSSProperties}>
       <div className="browser-dots"><i /><i /><i /></div>
@@ -71,6 +109,7 @@ export function SiteHub() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("全部");
   const [menu, setMenu] = useState<string | null>(null);
+  const [refreshes, setRefreshes] = useState<Record<string, number>>({});
 
   useEffect(() => setSites(loadSites()), []);
   const categories = useMemo(() => ["全部", ...Array.from(new Set(sites.map((site) => site.category)))], [sites]);
@@ -79,6 +118,10 @@ export function SiteHub() {
   function update(next: Site[]) { setSites(next); saveSites(next); setMenu(null); }
   function toggleFavorite(id: string) { update(sites.map((site) => site.id === id ? { ...site, favorite: !site.favorite } : site)); }
   function remove(id: string) { if (confirm("確定要從入口頁移除這個網站嗎？")) update(sites.filter((site) => site.id !== id)); }
+  function refreshThumbnail(id: string) {
+    setRefreshes((current) => ({ ...current, [id]: Date.now() }));
+    setMenu(null);
+  }
 
   return (
     <main>
@@ -104,13 +147,13 @@ export function SiteHub() {
         {visible.length ? <div className="site-grid">
           {visible.map((site, index) => (
             <article className="site-card" key={site.id}>
-              <a className="thumbnail" href={site.url} target={site.url === "#" ? undefined : "_blank"} rel="noreferrer"><Preview site={site} /><span className="open-pill">開啟 ↗</span></a>
+              <a className="thumbnail" href={site.url} target={site.url === "#" ? undefined : "_blank"} rel="noreferrer"><Preview site={site} refreshKey={refreshes[site.id]} /><span className="open-pill">開啟 ↗</span></a>
               <div className="card-body">
                 <div className="card-meta"><span className="number">{String(index + 1).padStart(2, "0")}</span><span className="category-dot" style={{ background: site.color }} /> <span>{site.category}</span></div>
                 <div className="card-heading"><h3>{site.title}</h3><button aria-label={`${site.title} 更多選項`} onClick={() => setMenu(menu === site.id ? null : site.id)}>•••</button></div>
                 <p>{site.description}</p>
                 {site.favorite && <span className="favorite">★ 常用</span>}
-                {menu === site.id && <div className="card-menu"><button onClick={() => toggleFavorite(site.id)}>{site.favorite ? "取消常用" : "設為常用"}</button><button className="danger" onClick={() => remove(site.id)}>移除網站</button></div>}
+                {menu === site.id && <div className="card-menu"><button onClick={() => refreshThumbnail(site.id)}>重新整理縮圖</button><button onClick={() => toggleFavorite(site.id)}>{site.favorite ? "取消常用" : "設為常用"}</button><button className="danger" onClick={() => remove(site.id)}>移除網站</button></div>}
               </div>
             </article>
           ))}
@@ -151,7 +194,7 @@ export function AddSite() {
           <div className="two-col"><label>分類<input required value={category} onChange={(e) => setCategory(e.target.value)} name="category" list="category-list" placeholder="選擇或輸入分類" /><datalist id="category-list"><option>教學資源</option><option>工作工具</option><option>專案計畫</option><option>個人收藏</option></datalist></label><label>卡片色彩<span className="color-row">{colors.map((item) => <button type="button" aria-label={`選擇色彩 ${item}`} className={color === item ? "selected" : ""} style={{ background: item }} onClick={() => setColor(item)} key={item} />)}</span></label></div>
           <label>簡短說明<textarea required name="description" rows={3} placeholder="這個網站主要用來做什麼？" /></label>
           <div className="form-section second"><span>02</span><h2>網站縮圖</h2></div>
-          <label>縮圖網址 <small>選填</small><input value={image} onChange={(e) => setImage(e.target.value)} name="image" type="url" placeholder="https://example.com/preview.jpg" /></label>
+          <label>自訂縮圖網址 <small>選填；留白會自動取得原網站縮圖</small><input value={image} onChange={(e) => setImage(e.target.value)} name="image" type="url" placeholder="https://example.com/preview.jpg" /></label>
           <div className="live-preview"><span>卡片預覽</span><div className="mini-card"><Preview site={{ id: "preview", title: title || "你的網站名稱", url: "#", category, description: "", image, color }} /><strong>{title || "你的網站名稱"}</strong><small>{category}</small></div></div>
           <div className="form-actions"><a href="/">取消</a><button type="submit">儲存並新增網站 <span>→</span></button></div>
         </form>
