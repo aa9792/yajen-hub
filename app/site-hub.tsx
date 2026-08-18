@@ -41,7 +41,7 @@ function Header() {
     <header className="topbar">
       <a className="brand" href="/" aria-label="回到首頁">
         <span className="brand-mark"><i /><i /><i /><i /></span>
-        <span>PORTAL</span>
+        <span className="brand-copy"><b>YAJEN HUB</b><small>雅真匯</small></span>
       </a>
       <nav aria-label="主要選單">
         <a href="/">所有網站</a>
@@ -85,9 +85,9 @@ export function SiteHub() {
       <Header />
       <section className="hero">
         <div>
-          <p className="eyebrow">YOUR DIGITAL HOME</p>
-          <h1>所有網站，<em>一目了然。</em></h1>
-          <p className="hero-copy">把散落各處的網站收進同一個入口，少一點尋找，多一點專注。</p>
+          <p className="eyebrow">MY DIGITAL UNIVERSE</p>
+          <h1>我的網站，<em>一站匯聚。</em></h1>
+          <p className="hero-copy">歡迎來到雅真匯。收藏每一個重要網站，讓靈感、工作與生活，都在這裡輕盈相遇。</p>
         </div>
         <div className="hero-stat"><strong>{String(sites.length).padStart(2, "0")}</strong><span>個網站<br />已收錄</span></div>
       </section>
@@ -117,7 +117,7 @@ export function SiteHub() {
           <a className="add-card" href="/add"><span>＋</span><strong>新增一個網站</strong><small>建立新的快速入口</small></a>
         </div> : <div className="empty"><strong>沒有找到符合的網站</strong><p>試著更換關鍵字或分類。</p></div>}
       </section>
-      <footer><span>PORTAL · YOUR DIGITAL HOME</span><span>保持簡單，專注重要的事。</span></footer>
+      <footer><span>YAJEN HUB · 雅真匯</span><span>我的網站，一站匯聚。</span></footer>
     </main>
   );
 }
@@ -143,7 +143,7 @@ export function AddSite() {
     <main>
       <Header />
       <section className="add-layout">
-        <div className="form-intro"><a href="/">← 返回網站總覽</a><p className="eyebrow">ADD A NEW SITE</p><h1>新增你的<br /><em>下一個入口。</em></h1><p>填入網站資訊，它就會出現在你的入口首頁。所有欄位之後都可以重新建立。</p></div>
+        <div className="form-intro"><a href="/">← 返回雅真匯</a><p className="eyebrow">ADD TO YAJEN HUB</p><h1>收藏你的<br /><em>下一個入口。</em></h1><p>填入網站資訊，它就會出現在雅真匯首頁，成為你數位世界的一部分。</p></div>
         <form className="site-form" onSubmit={submit}>
           <div className="form-section"><span>01</span><h2>基本資訊</h2></div>
           <label>網站名稱<input required value={title} onChange={(e) => setTitle(e.target.value)} name="title" placeholder="例如：課程管理系統" /></label>
