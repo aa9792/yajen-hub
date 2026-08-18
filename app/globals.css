@@ -21,3 +21,10 @@
 .preview-content strong{color:color-mix(in srgb,var(--site-color) 34%,#20294e)}
 .preview-line{background:color-mix(in srgb,var(--site-color) 48%,white)}
 .preview-button{background:color-mix(in srgb,var(--site-color) 42%,#5c4bd8)}
+
+/* Keep the hero slogan together without sacrificing mobile readability. */
+.hero>div:first-child{flex:1;min-width:0}
+.hero h1{font-size:clamp(48px,5.7vw,88px);letter-spacing:-.065em;white-space:nowrap}
+.hero h1 em{display:inline-block;white-space:nowrap}
+@media(max-width:900px){.hero h1{font-size:clamp(50px,8vw,72px);white-space:normal}}
+@media(max-width:620px){.hero h1{font-size:46px}}
