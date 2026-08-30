@@ -14,6 +14,13 @@ type Site = {
 };
 
 const STORAGE_KEY = "site-hub-items-v1";
+
+function appHref(path: "/" | "/add") {
+  if (typeof window !== "undefined" && window.location.hostname.endsWith("github.io")) {
+    return path === "/" ? "./#/" : "./#/add";
+  }
+  return path;
+}
 const SOFT_COLOR_MAP: Record<string, string> = {
   "#396253": "#BFE6D3",
   "#bf6948": "#F6B8D4",
@@ -50,13 +57,13 @@ function saveSites(sites: Site[]) {
 function Header() {
   return (
     <header className="topbar">
-      <a className="brand" href="/" aria-label="回到首頁">
+      <a className="brand" href={appHref("/")} aria-label="回到首頁">
         <span className="brand-mark"><i /><i /><i /><i /></span>
         <span className="brand-copy"><b>YAJEN HUB</b><small>雅真匯</small></span>
       </a>
       <nav aria-label="主要選單">
-        <a href="/">所有網站</a>
-        <a className="add-link" href="/add"><span>＋</span> 新增網站</a>
+        <a href={appHref("/")}>所有網站</a>
+        <a className="add-link" href={appHref("/add")}><span>＋</span> 新增網站</a>
       </nav>
     </header>
   );
@@ -168,7 +175,7 @@ export function SiteHub() {
               </div>
             </article>
           ))}
-          <a className="add-card" href="/add"><span>＋</span><strong>新增一個網站</strong><small>建立新的快速入口</small></a>
+          <a className="add-card" href={appHref("/add")}><span>＋</span><strong>新增一個網站</strong><small>建立新的快速入口</small></a>
         </div> : <div className="empty"><strong>沒有找到符合的網站</strong><p>試著更換關鍵字或分類。</p></div>}
       </section>
       <footer><span>YAJEN HUB · 雅真匯</span><span>我的網站，一站匯聚。</span></footer>
@@ -190,14 +197,14 @@ export function AddSite() {
     const url = String(form.get("url") || "");
     const next: Site = { id: crypto.randomUUID(), title, url: /^https?:\/\//i.test(url) ? url : `https://${url}`, category, description: String(form.get("description") || ""), image, color };
     saveSites([next, ...current]);
-    window.location.href = "/";
+    window.location.href = appHref("/");
   }
 
   return (
     <main>
       <Header />
       <section className="add-layout">
-        <div className="form-intro"><a href="/">← 返回雅真匯</a><p className="eyebrow">ADD TO YAJEN HUB</p><h1>收藏你的<br /><em>下一個入口。</em></h1><p>填入網站資訊，它就會出現在雅真匯首頁，成為你數位世界的一部分。</p></div>
+        <div className="form-intro"><a href={appHref("/")}>← 返回雅真匯</a><p className="eyebrow">ADD TO YAJEN HUB</p><h1>收藏你的<br /><em>下一個入口。</em></h1><p>填入網站資訊，它就會出現在雅真匯首頁，成為你數位世界的一部分。</p></div>
         <form className="site-form" onSubmit={submit}>
           <div className="form-section"><span>01</span><h2>基本資訊</h2></div>
           <label>網站名稱<input required value={title} onChange={(e) => setTitle(e.target.value)} name="title" placeholder="例如：課程管理系統" /></label>
@@ -207,7 +214,7 @@ export function AddSite() {
           <div className="form-section second"><span>02</span><h2>網站縮圖</h2></div>
           <label>自訂縮圖網址 <small>選填；留白會自動取得原網站縮圖</small><input value={image} onChange={(e) => setImage(e.target.value)} name="image" type="url" placeholder="https://example.com/preview.jpg" /></label>
           <div className="live-preview"><span>卡片預覽</span><div className="mini-card"><Preview site={{ id: "preview", title: title || "你的網站名稱", url: "#", category, description: "", image, color }} /><strong>{title || "你的網站名稱"}</strong><small>{category}</small></div></div>
-          <div className="form-actions"><a href="/">取消</a><button type="submit">儲存並新增網站 <span>→</span></button></div>
+          <div className="form-actions"><a href={appHref("/")}>取消</a><button type="submit">儲存並新增網站 <span>→</span></button></div>
         </form>
       </section>
     </main>

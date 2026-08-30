@@ -1,4 +1,17 @@
-# vinext-starter
+# YAJEN HUB｜雅真匯
+
+> 我的網站，一站匯聚。
+
+YAJEN HUB 是羅雅真的個人網站入口，提供網站縮圖、搜尋、分類、常用標記與新增網站功能。網站資料目前儲存在瀏覽器的 `localStorage`；`google-apps-script/` 另附 Google Sheets 紀錄服務的部署程式。
+
+## 發布方式
+
+- `npm run dev`：啟動本機開發環境
+- `npm run build`：建立 Sites 版本
+- `npm run build:github`：建立 GitHub Pages 靜態版本
+- 推送到 `main` 後，`.github/workflows/deploy-pages.yml` 會自動更新 GitHub Pages
+
+## 原始技術說明
 
 A clean full-stack starter running on
 [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
