@@ -14,6 +14,8 @@ type Site = {
 };
 
 const STORAGE_KEY = "site-hub-items-v1";
+const SYNC_TOKEN_KEY = "yajen-hub-sheet-token-v1";
+const SHEET_API_URL = import.meta.env.VITE_SHEET_API_URL || "";
 
 function appHref(path: "/" | "/add") {
   if (typeof window !== "undefined" && window.location.hostname.endsWith("github.io")) {
@@ -189,15 +191,35 @@ export function AddSite() {
   const [image, setImage] = useState("");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("工作工具");
+  const [syncToken, setSyncToken] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => setSyncToken(localStorage.getItem(SYNC_TOKEN_KEY) || ""), []);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setSaving(true);
+    setSaveError("");
     const form = new FormData(event.currentTarget);
     const current = loadSites();
     const url = String(form.get("url") || "");
     const next: Site = { id: crypto.randomUUID(), title, url: /^https?:\/\//i.test(url) ? url : `https://${url}`, category, description: String(form.get("description") || ""), image, color };
-    saveSites([next, ...current]);
-    window.location.href = appHref("/");
+    try {
+      if (!SHEET_API_URL) throw new Error("Google 試算表尚未完成連線設定。");
+      await fetch(SHEET_API_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "addSite", token: syncToken, site: next }),
+      });
+      localStorage.setItem(SYNC_TOKEN_KEY, syncToken);
+      saveSites([next, ...current]);
+      window.location.href = appHref("/");
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "無法寫入 Google 試算表，請稍後再試。");
+      setSaving(false);
+    }
   }
 
   return (
@@ -213,8 +235,10 @@ export function AddSite() {
           <label>簡短說明<textarea required name="description" rows={3} placeholder="這個網站主要用來做什麼？" /></label>
           <div className="form-section second"><span>02</span><h2>網站縮圖</h2></div>
           <label>自訂縮圖網址 <small>選填；留白會自動取得原網站縮圖</small><input value={image} onChange={(e) => setImage(e.target.value)} name="image" type="url" placeholder="https://example.com/preview.jpg" /></label>
+          <label>Google 試算表同步金鑰 <small>只保存在這個瀏覽器，不會上傳到 GitHub</small><input required value={syncToken} onChange={(e) => setSyncToken(e.target.value)} name="syncToken" type="password" autoComplete="off" placeholder="請輸入同步金鑰" /></label>
           <div className="live-preview"><span>卡片預覽</span><div className="mini-card"><Preview site={{ id: "preview", title: title || "你的網站名稱", url: "#", category, description: "", image, color }} /><strong>{title || "你的網站名稱"}</strong><small>{category}</small></div></div>
-          <div className="form-actions"><a href={appHref("/")}>取消</a><button type="submit">儲存並新增網站 <span>→</span></button></div>
+          {saveError && <p className="save-error" role="alert">{saveError}</p>}
+          <div className="form-actions"><a href={appHref("/")}>取消</a><button type="submit" disabled={saving}>{saving ? "正在同步試算表…" : "儲存並新增網站"} <span>{saving ? "" : "→"}</span></button></div>
         </form>
       </section>
     </main>

@@ -9,6 +9,8 @@ function doPost(e) {
   try {
     const body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     if (body.action !== 'addSite') throw new Error('Unsupported action');
+    const expectedToken = PropertiesService.getScriptProperties().getProperty('YAJEN_HUB_TOKEN');
+    if (!expectedToken || body.token !== expectedToken) throw new Error('Unauthorized');
     const site = body.site || {};
     if (!site.title || !site.url || !site.category) throw new Error('Missing required site fields');
 

@@ -11,6 +11,10 @@ YAJEN HUB 是羅雅真的個人網站入口，提供網站縮圖、搜尋、分�
 - `npm run build:github`：建立 GitHub Pages 靜態版本
 - 推送到 `main` 後，`.github/workflows/deploy-pages.yml` 會自動更新 GitHub Pages
 
+## Google Sheets 同步
+
+部署 `google-apps-script/` 內的 Apps Script 網路應用程式後，先在指令碼屬性建立 `YAJEN_HUB_TOKEN`，再將執行網址設定為 GitHub Actions 儲存庫變數 `VITE_SHEET_API_URL`。新增網站時會以瀏覽器內保存的同步金鑰驗證，寫入「網站紀錄」分頁並依分類、網站名稱自動排序，成功送出後才會保存到瀏覽器。
+
 ## 原始技術說明
 
 A clean full-stack starter running on
