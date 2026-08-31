@@ -30,3 +30,8 @@
 @media(max-width:620px){.hero h1{font-size:46px}}
 
 .form-actions button:disabled{cursor:wait;opacity:.72}.save-error{margin:0;color:#b63f69;font-size:12px;font-weight:700;background:rgba(255,238,246,.72);border:1px solid rgba(182,63,105,.18);border-radius:12px;padding:12px 14px}
+
+/* Keep the glass navigation anchored to the viewport while content scrolls. */
+main{padding-top:96px}
+.topbar{position:fixed;top:18px;left:50%;transform:translateX(-50%);margin:0;z-index:100}
+@media(max-width:620px){main{padding-top:78px}.topbar{top:10px;margin:0}}
