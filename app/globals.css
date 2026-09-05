@@ -35,3 +35,9 @@
 main{padding-top:0}
 .topbar{position:relative;top:auto;left:auto;transform:none;margin:18px auto 0;z-index:20}
 @media(max-width:620px){main{padding-top:0}.topbar{top:auto;margin:10px auto 0}}
+
+/* Make the durable Google Sheets source visible without competing with filters. */
+.sync-state{flex:0 0 100%;margin:0 2px -4px;text-align:right;font-size:10px;color:#747c9a;letter-spacing:.03em}
+.sync-state.synced{color:#4e7290}.sync-state.local{color:#a16472}
+.controls{flex-wrap:wrap}.controls>.search,.controls>.categories{margin-bottom:-2px}
+@media(max-width:900px){.sync-state{text-align:left}.controls>.search,.controls>.categories{margin-bottom:0}}

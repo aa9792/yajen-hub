@@ -1,8 +1,37 @@
 const SPREADSHEET_ID = '1SfiJ97f1QTO3vsF9UrxotlO4zxMZxth6HyTPun72zOI';
 const RECORDS_SHEET = '網站紀錄';
 
-function doGet() {
-  return jsonResponse({ ok: true, service: 'YAJEN HUB Sheet Sync' });
+function doGet(e) {
+  try {
+    const action = (e && e.parameter && e.parameter.action) || '';
+    if (action !== 'listSites') {
+      return jsonResponse({ ok: true, service: 'YAJEN HUB Sheet Sync' });
+    }
+
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(RECORDS_SHEET);
+    if (!sheet) throw new Error('Records sheet not found');
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return jsonResponse({ ok: true, sites: [] });
+
+    const colors = ['#C9C0FF', '#F6B8D4', '#A9E5F1', '#BFE6D3', '#F7D6A3', '#C8D9FF'];
+    const rows = sheet.getRange(2, 1, lastRow - 1, 6).getDisplayValues();
+    const sites = rows.filter(function (row) {
+      return row[1] && row[2];
+    }).map(function (row, index) {
+      return {
+        id: 'sheet-' + (index + 2),
+        category: row[0] || '其他',
+        title: row[1],
+        url: row[2],
+        description: row[3] || '',
+        image: row[5] || '',
+        color: colors[index % colors.length]
+      };
+    });
+    return jsonResponse({ ok: true, sites: sites });
+  } catch (error) {
+    return jsonResponse({ ok: false, error: error.message || String(error) });
+  }
 }
 
 function doPost(e) {

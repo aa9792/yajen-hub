@@ -56,6 +56,23 @@ function saveSites(sites: Site[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sites));
 }
 
+async function loadSheetSites(): Promise<Site[]> {
+  if (!SHEET_API_URL) throw new Error("Google 試算表尚未完成連線設定。");
+  const response = await fetch(`${SHEET_API_URL}?action=listSites&_=${Date.now()}`, { cache: "no-store" });
+  if (!response.ok) throw new Error("無法讀取 Google 試算表。");
+  const result = await response.json();
+  if (!result.ok || !Array.isArray(result.sites)) throw new Error(result.error || "試算表服務尚未更新。");
+  return result.sites.map((site: Partial<Site>, index: number) => ({
+    id: site.id || `sheet-${index}`,
+    title: site.title || "未命名網站",
+    url: site.url || "#",
+    category: site.category || "其他",
+    description: site.description || "",
+    image: site.image || "",
+    color: site.color || ["#C9C0FF", "#F6B8D4", "#A9E5F1", "#BFE6D3", "#F7D6A3"][index % 5],
+  }));
+}
+
 function Header() {
   return (
     <header className="topbar">
@@ -130,8 +147,24 @@ export function SiteHub() {
   const [category, setCategory] = useState("全部");
   const [menu, setMenu] = useState<string | null>(null);
   const [refreshes, setRefreshes] = useState<Record<string, number>>({});
+  const [syncState, setSyncState] = useState<"loading" | "synced" | "local">("loading");
 
-  useEffect(() => setSites(loadSites()), []);
+  useEffect(() => {
+    let active = true;
+    const localSites = loadSites();
+    setSites(localSites);
+    loadSheetSites()
+      .then((sheetSites) => {
+        if (!active) return;
+        setSites(sheetSites);
+        saveSites(sheetSites);
+        setSyncState("synced");
+      })
+      .catch(() => {
+        if (active) setSyncState("local");
+      });
+    return () => { active = false; };
+  }, []);
   const categories = useMemo(() => ["全部", ...Array.from(new Set(sites.map((site) => site.category)))], [sites]);
   const visible = sites.filter((site) => (category === "全部" || site.category === category) && `${site.title} ${site.description}`.toLowerCase().includes(query.toLowerCase()));
 
@@ -160,6 +193,7 @@ export function SiteHub() {
         <div className="categories">
           {categories.map((item) => <button key={item} className={category === item ? "active" : ""} onClick={() => setCategory(item)}>{item}</button>)}
         </div>
+        <p className={`sync-state ${syncState}`} aria-live="polite">{syncState === "loading" ? "正在載入試算表資料…" : syncState === "synced" ? "✓ 已從 Google 試算表載入" : "目前顯示此瀏覽器的暫存資料"}</p>
       </section>
 
       <section className="gallery">
