@@ -13,7 +13,7 @@ type Site = {
   favorite?: boolean;
 };
 
-const STORAGE_KEY = "site-hub-items-v1";
+const STORAGE_KEY = "site-hub-items-v2";
 const SYNC_TOKEN_KEY = "yajen-hub-sheet-token-v1";
 const SHEET_API_URL = import.meta.env.VITE_SHEET_API_URL || "";
 
@@ -32,10 +32,9 @@ const SOFT_COLOR_MAP: Record<string, string> = {
 };
 
 const starterSites: Site[] = [
-  { id: "reeds", title: "REEDS 學習中心", url: "https://aa9792.github.io/reeds/", category: "教學資源", description: "課程規劃、教學內容與校務資訊的整合平台。", color: "#396253", favorite: true },
-  { id: "curriculum", title: "課程設計工作台", url: "#", category: "工作工具", description: "整理課程地圖、學習目標與每週教學進度。", color: "#bf6948" },
-  { id: "resources", title: "教師資源庫", url: "#", category: "教學資源", description: "常用教材、表單與教學素材的快速入口。", color: "#446789" },
-  { id: "adventure", title: "戶外教育計畫", url: "#", category: "專案計畫", description: "梯次、師資安排與戶外課程紀錄。", color: "#a17a38" },
+  { id: "sheet-backup-1", title: "睿思請購單", url: "https://aa9792.github.io/reeds-request-form/", category: "工作工具", description: "睿思實驗機構核銷請示單", color: "#BFE6D3" },
+  { id: "sheet-backup-2", title: "長興國小戶外教育網頁", url: "https://aa9792.github.io/changxing-outdoor-education/", category: "專案計畫", description: "紀錄長興國小戶外教育", color: "#F7D6A3" },
+  { id: "sheet-backup-3", title: "學習月台搶答站", url: "https://student-buzzer-classroom.onrender.com/", category: "教學資源", description: "點名、備課", color: "#A9E5F1" },
 ];
 
 function loadSites(): Site[] {
@@ -62,7 +61,10 @@ async function loadSheetSites(): Promise<Site[]> {
   if (!response.ok) throw new Error("無法讀取 Google 試算表。");
   const result = await response.json();
   if (!result.ok || !Array.isArray(result.sites)) throw new Error(result.error || "試算表服務尚未更新。");
-  return result.sites.map((site: Partial<Site>, index: number) => ({
+  const uniqueSites = result.sites.filter((site: Partial<Site>, index: number, sites: Partial<Site>[]) =>
+    index === sites.findIndex((candidate) => candidate.url === site.url)
+  );
+  return uniqueSites.map((site: Partial<Site>, index: number) => ({
     id: site.id || `sheet-${index}`,
     title: site.title || "未命名網站",
     url: site.url || "#",
